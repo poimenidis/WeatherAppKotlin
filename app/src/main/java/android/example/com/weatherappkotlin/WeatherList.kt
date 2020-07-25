@@ -1,5 +1,6 @@
 package android.example.com.weatherappkotlin
 
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 import java.net.URL
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,6 +43,13 @@ class WeatherList : AppCompatActivity() {
 
         adapter = WeatherAdapter(this,weatherList)
         listView.adapter = adapter
+
+        listView.setOnItemClickListener { parent, view, position, id ->
+            val element = position // The item that was clicked
+            val intent = Intent(this, WeatherDetails::class.java)
+            intent.putExtra("element", element)
+            startActivity(intent)
+        }
 
         weatherTask().execute()
     }
@@ -93,15 +102,18 @@ class WeatherList : AppCompatActivity() {
                         ).format(
                             Date(updatedAt * 1000)
                         )
-                    val tempMin = temp.getString("min") + "°C"
-                    val tempMax = temp.getString("max") + "°C"
+
+                    val format2: DateFormat = SimpleDateFormat("EEEE")
+                    val finalDay: String = format2.format(Date(updatedAt * 1000))
+
+                    val eve = temp.getString("eve")
+                    //******************************
+                    val strs = eve.split(".").toTypedArray()
 
                     val wea = Noumero.getJSONArray("weather")
                     val icon = wea.getJSONObject(0).getString("icon")
 
-                    Log.i("makis",icon)
-
-                    var w1 = Weather(icon,updatedAtText,tempMax)
+                    var w1 = Weather(icon,finalDay+"    "+ updatedAtText,"Temperature: "+strs[0]+ "°C")
                     weatherList.add(w1)
                 }
                 /* Views populated, Hiding the loader, Showing the main design */
