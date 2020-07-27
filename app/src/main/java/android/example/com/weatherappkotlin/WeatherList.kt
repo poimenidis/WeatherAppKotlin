@@ -7,7 +7,9 @@ import android.util.Log
 import android.view.View
 import android.widget.ListView
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import org.json.JSONObject
 import java.net.URL
 import java.text.DateFormat
@@ -16,16 +18,33 @@ import java.util.*
 
 class WeatherList : AppCompatActivity() {
 
-    private val CITY: String = "thessaloniki"
+    private var CITY: String = "thessaloniki"
     private val API: String = "b1b15e88fa797225412429c1c50c122a1"
     private var adapter: WeatherAdapter? = null
     private var weatherList = ArrayList<Weather>()
+    private var textviewloc: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_weather_list)
 
+        textviewloc = findViewById(R.id.location)
+
         val listView: ListView = findViewById(R.id.listview)
+
+        val searchView = findViewById(R.id.search_bar) as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (query!=null) {
+                    CITY = query
+                    weatherTask().execute()
+                }
+                return true
+            }
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
 
 //        var weatherList = ArrayList<String>()
 //        weatherList.add("lk")
@@ -119,10 +138,13 @@ class WeatherList : AppCompatActivity() {
                 /* Views populated, Hiding the loader, Showing the main design */
                 findViewById<ProgressBar>(R.id.load).visibility = View.GONE
                 adapter?.notifyDataSetChanged()
+                textviewloc!!.text ="WEATHER IN $CITY".toUpperCase()
 
             } catch (e: Exception) {
                 findViewById<ProgressBar>(R.id.load).visibility = View.GONE
                 Log.i("makis","error")
+                textviewloc!!.text = "NO RESULTS"
+                adapter?.clear()
             }
 
         }
